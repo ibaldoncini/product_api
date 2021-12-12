@@ -43,28 +43,9 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 
         return validated
 
-    def create(self, validated_data):
-        product = validated_data['product']
-        product.stock -= validated_data['quantity']
-        product.save()
-
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        old_quantity = instance.quantity
-        new_quantity = validated_data['quantity']
-
-        instance.product.stock -= new_quantity - old_quantity
-        instance.product.save()
-
-        return super().update(instance, validated_data)
-
     class Meta:
         model = OrderDetail
         fields = ['product', 'quantity', 'id']
-        extra_kwargs = {
-            'order': {'read_only': True}
-        }
 
 
 class OrderSerializer(WritableNestedModelSerializer):
@@ -79,11 +60,6 @@ class OrderSerializer(WritableNestedModelSerializer):
             detail.delete()
 
         return super().update(instance, validated_data)
-
-    @staticmethod
-    def create_details(order, details):
-        for detail in details:
-            OrderDetail.objects.create(order=order, **detail)
 
     class Meta:
         model = Order

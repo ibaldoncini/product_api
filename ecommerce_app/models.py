@@ -52,7 +52,8 @@ class OrderDetail(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='order_details'
+        related_name='order_details',
+        blank=True
     )
     quantity = models.IntegerField(MinValueValidator(0))
     product = models.ForeignKey(
@@ -60,6 +61,18 @@ class OrderDetail(models.Model):
         on_delete=models.CASCADE,
         related_name='order_details'
     )
+
+    def save(self, *args, **kwargs):
+        product = self.product
+
+        if self.pk is not None:
+            original = OrderDetail.objects.get(pk=self.pk)
+            product.stock += original.quantity - self.quantity
+        else:
+            product.stock -= self.quantity
+
+        product.save()    
+        super(OrderDetail, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         product = self.product

@@ -3,10 +3,11 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ecommerce_app.models import Product, Order
+from ecommerce_app.models import Product, Order, OrderDetail
 from ecommerce_app.serializers import (
     ProductSerializer,
-    OrderSerializer
+    OrderSerializer,
+    OrderDetailSerializer
 )
 
 
@@ -49,3 +50,10 @@ class OrderViewset(viewsets.ModelViewSet):
             )
 
         return response
+
+
+class OrderDetailViewset(viewsets.ModelViewSet):
+    queryset = OrderDetail.objects.all()
+    serializer_class = OrderDetailSerializer
+    permission_classes = [IsAuthenticated]
+    
