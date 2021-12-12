@@ -37,9 +37,13 @@ class Order(models.Model):
     def get_total_usd(self):
         ars_price = self.get_total()
         current_blue = get_blue_price()
-        return ars_price * current_blue
+        return round(ars_price / current_blue, 2)
 
     def delete_details(self):
+        """
+        order_details.all().delete() doesn't call delete method,
+        so we call it manually to keep stock updated
+        """
         for detail in self.order_details.all():
             detail.delete()
 
@@ -52,8 +56,7 @@ class OrderDetail(models.Model):
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,
-        related_name='order_details',
-        blank=True
+        related_name='order_details'
     )
     quantity = models.IntegerField(MinValueValidator(0))
     product = models.ForeignKey(
@@ -63,6 +66,10 @@ class OrderDetail(models.Model):
     )
 
     def save(self, *args, **kwargs):
+        """
+        Update Product stock on detail create/update
+        """
+
         product = self.product
 
         if self.pk is not None:
@@ -71,10 +78,14 @@ class OrderDetail(models.Model):
         else:
             product.stock -= self.quantity
 
-        product.save()    
+        product.save()
         super(OrderDetail, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        """
+        Update Product stock on detail delete
+        """
+
         product = self.product
         product.stock += self.quantity
         product.save()

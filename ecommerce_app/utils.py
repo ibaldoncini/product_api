@@ -1,5 +1,6 @@
 import requests
 
+
 DOLAR_API_URL = "https://www.dolarsi.com/api/api.php?type=valoresprincipales"
 
 
